@@ -65,7 +65,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<Product?> GetByNameAsync(string name)
     {
-        return await _context.Products.FindAsync(name);
+        return await _context.Products.FirstOrDefaultAsync(p => p.Name == name);
     }
 
     public async Task AddAsync(Product product)

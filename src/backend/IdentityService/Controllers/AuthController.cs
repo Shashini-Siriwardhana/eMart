@@ -55,7 +55,5 @@ public class AuthController(IAuthService authService) : ControllerBase
             return Unauthorized(new { message = "Invalid refresh token or user not found." });
         }
         return Ok(result);
-    }
-
-    
+    }  
 }
