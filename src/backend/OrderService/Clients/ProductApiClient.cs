@@ -28,15 +28,29 @@ public class ProductApiClient : IProductApiClient
         return await response.Content.ReadFromJsonAsync<ProductDto>();
     }
 
-    public async Task<bool> ReduceStockAsync(Guid productId, int quantity)
+    public async Task<ProductDto?> ReserveStockAsync(Guid productId, int quantity)
     {
         var response = await _httpClient.PostAsJsonAsync(
-            $"api/products/{productId}/reduce-stock",
+            $"api/products/{productId}/reserve-stock",
             new ReduceStockDto
             {
                 Quantity = quantity
             });
 
-        return response.IsSuccessStatusCode;
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ProductDto>();
+    }
+
+    public async Task<ProductDto?> ReleaseStockAsync(Guid productId, int quantity)
+    {
+        var response = await _httpClient.PostAsJsonAsync(
+            $"api/products/{productId}/release-stock",
+            new ReduceStockDto
+            {
+                Quantity = quantity
+            });
+
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ProductDto>();
     }
 }

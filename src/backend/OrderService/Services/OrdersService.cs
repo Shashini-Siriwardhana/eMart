@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.Features;
 using OrderService.Clients;
 using OrderService.Data;
 using OrderService.DTOs;
@@ -52,7 +53,7 @@ public class OrdersService : IOrdersService
         {
             Id = orderId,
             UserId = userId,
-            Status = OrderStatus.Pending,
+            Status = OrderStatus.PendingPayment,
             Subtotal = 0,
             TotalCost = 0,
             ShippingCost = 0,
@@ -61,16 +62,12 @@ public class OrdersService : IOrdersService
         };
 
         order.Subtotal = 0;
+        var reservedItems = new List<(Guid ProductId, int Quantity)>();
 
         foreach (var item in cart.CartItems)
         {
             var product = await _productApiClient.GetProductByIdAsync(item.ProductId);
             if (product is null)
-            {
-                return null;
-            }
-
-            if (product.StockQuantity < item.Quantity)
             {
                 return null;
             }
@@ -89,12 +86,19 @@ public class OrdersService : IOrdersService
             order.Subtotal += orderItem.SubTotal;
 
             order.OrderItems.Add(orderItem);
-            var stockReduced = await _productApiClient.ReduceStockAsync(item.ProductId, item.Quantity);
+            var stockReserved = await _productApiClient.ReserveStockAsync(item.ProductId, item.Quantity);
 
-            if (!stockReduced)
+            if (stockReserved is null)
             {
+                // Release everything reserved so far
+                foreach (var reservedItem in reservedItems)
+                {
+                    await _productApiClient.ReleaseStockAsync(reservedItem.ProductId, reservedItem.Quantity);
+                }
                 return null;
             }
+
+            reservedItems.Add((item.ProductId, item.Quantity));
         }
         order.TotalCost = order.Subtotal + order.ShippingCost;
 
@@ -105,7 +109,6 @@ public class OrdersService : IOrdersService
         await _cartApiClient.ClearCartAsync(userId);
 
         // Confirm
-        order.Status = OrderStatus.Confirmed;
         order.UpdatedAt = DateTime.UtcNow;
         await _repository.SaveAsync();
 
@@ -116,7 +119,7 @@ public class OrdersService : IOrdersService
     {
         var order = await _repository.GetOrderByIdAsync(orderId);
 
-        if (order is null)
+        if (order is null || order.Status != OrderStatus.PendingPayment)
         {
             return null;
         }
@@ -129,6 +132,12 @@ public class OrdersService : IOrdersService
         }
 
         order.Status = OrderStatus.Cancelled;
+
+        foreach (var item in order.OrderItems)
+        {
+            await _productApiClient.ReleaseStockAsync(item.ProductId, item.Quantity);
+        }
+
         order.UpdatedAt = DateTime.UtcNow;
         await _repository.SaveAsync();
 
