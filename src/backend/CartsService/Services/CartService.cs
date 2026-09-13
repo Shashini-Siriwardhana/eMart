@@ -49,16 +49,26 @@ public class CartService : ICartService
                     Id = Guid.NewGuid(),
                     CartId = existingCart.Id,
                     ProductId = dto.ProductId,
-                    Quantity = dto.Quantity
+                    Quantity = dto.Quantity,
                 };
+                existingCart.Subtotal = existingCart.Subtotal + item.Quantity * product.Price;
                 await _repository.AddCartItemAsync(item);
             } else
             {
                 var updatedQuantity = existingItem.Quantity + dto.Quantity;
-                existingItem.Quantity = updatedQuantity < 0 ? existingItem.Quantity : updatedQuantity;
+
+                if (updatedQuantity < 0 || updatedQuantity > product.StockQuantity)
+                {
+                    return null;
+                }
+
+                existingItem.Quantity = updatedQuantity;
+                await RecalculateCartTotals(existingCart);
+                
             }
 
             existingCart.UpdatedAt = DateTime.UtcNow;
+            existingCart.TotalCost = existingCart.Subtotal + existingCart.ShippingCost;
             await _repository.SaveChangesAsync();
             return await CreateCartResponse(existingCart);
         }
@@ -70,15 +80,20 @@ public class CartService : ICartService
                 Id = Guid.NewGuid(),
                 CartId = cartId,
                 ProductId = dto.ProductId,
-                Quantity = dto.Quantity
+                Quantity = dto.Quantity,
             };
 
+        var cost = product.Price * cartItem.Quantity;
+        var shippingCost = 0;
         Cart cart = new Cart
         {
             Id = cartId,
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
-            CartItems = [cartItem]
+            CartItems = [cartItem],
+            Subtotal = cost,
+            ShippingCost = shippingCost,
+            TotalCost = cost + shippingCost
         };
 
         await _repository.AddCartAsync(cart);
@@ -111,16 +126,35 @@ public class CartService : ICartService
             return null;
         }
 
-        var updatedQuantity = existingCartItem.Quantity + quantity;
+        // var updatedQuantity = existingCartItem.Quantity + quantity;
 
-        if (updatedQuantity < 0 || updatedQuantity > product.StockQuantity)
+        if (quantity < 0 || quantity > product.StockQuantity)
         {
             return null;
-        } else if (updatedQuantity == 0)
+        } else if (quantity == 0)
         {
             _repository.RemoveCartItem(existingCartItem);
+            existingCart.CartItems.Remove(existingCartItem);
+
+            if (existingCart.CartItems.Count == 0)
+            {
+                await DeleteCartAsync(userId);
+                // Return an empty cart for the response
+                existingCart.CartItems = [];
+                existingCart.TotalCost = 0;
+                existingCart.Subtotal = 0;
+                existingCart.ShippingCost = 0;
+
+                return existingCart;
+            } 
+            
+        } else
+        {
+            existingCartItem.Quantity = quantity;
         }
-        await _repository.UpdateItemQuantity(existingCart.Id, productId, updatedQuantity);
+
+        await _repository.UpdateItemQuantity(existingCart.Id, productId, quantity);
+        await RecalculateCartTotals(existingCart);
         existingCart.UpdatedAt = DateTime.UtcNow;
         await _repository.SaveChangesAsync();
 
@@ -142,9 +176,21 @@ public class CartService : ICartService
         {
             return null;
         }
-
         _repository.RemoveCartItem(cartItem);
         existingCart.CartItems.Remove(cartItem);
+
+        if (existingCart.CartItems.Count == 0)
+        {
+            await DeleteCartAsync(userId);
+            // Return an empty cart for the response
+            existingCart.CartItems = [];
+            existingCart.TotalCost = 0;
+            existingCart.Subtotal = 0;
+            existingCart.ShippingCost = 0;
+
+            return existingCart;
+        } 
+        existingCart = await RecalculateCartTotals(existingCart);
         existingCart.UpdatedAt = DateTime.UtcNow;
         await _repository.SaveChangesAsync();
         return await CreateCartResponse(existingCart);
@@ -182,4 +228,20 @@ public class CartService : ICartService
         return cart;
     }
 
+    private async Task<Cart> RecalculateCartTotals(Cart cart)
+    {
+        cart.Subtotal = 0;
+        foreach (var cartItem in cart.CartItems)
+        {
+            var product = await _productApiClient
+                .GetProductByIdAsync(cartItem.ProductId);
+            if (product is null)
+            {
+                continue;
+            }
+            cart.Subtotal += product.Price * cartItem.Quantity;
+        }
+        cart.TotalCost = cart.Subtotal + cart.ShippingCost;
+        return cart;
+    }
 }

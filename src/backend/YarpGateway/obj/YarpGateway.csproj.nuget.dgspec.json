@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/shashinisiriwardhana/Doc/Projects/eMart/src/YarpGateway/YarpGateway.csproj": {}
+    "/Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/YarpGateway/YarpGateway.csproj": {}
   },
   "projects": {
-    "/Users/shashinisiriwardhana/Doc/Projects/eMart/src/YarpGateway/YarpGateway.csproj": {
+    "/Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/YarpGateway/YarpGateway.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/shashinisiriwardhana/Doc/Projects/eMart/src/YarpGateway/YarpGateway.csproj",
+        "projectUniqueName": "/Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/YarpGateway/YarpGateway.csproj",
         "projectName": "YarpGateway",
-        "projectPath": "/Users/shashinisiriwardhana/Doc/Projects/eMart/src/YarpGateway/YarpGateway.csproj",
+        "projectPath": "/Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/YarpGateway/YarpGateway.csproj",
         "packagesPath": "/Users/shashinisiriwardhana/.nuget/packages/",
-        "outputPath": "/Users/shashinisiriwardhana/Doc/Projects/eMart/src/YarpGateway/obj/",
+        "outputPath": "/Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/YarpGateway/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/shashinisiriwardhana/.nuget/NuGet/NuGet.Config"

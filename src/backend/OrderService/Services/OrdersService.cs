@@ -53,10 +53,14 @@ public class OrdersService : IOrdersService
             Id = orderId,
             UserId = userId,
             Status = OrderStatus.Pending,
-            TotalAmount = 0,
+            Subtotal = 0,
+            TotalCost = 0,
+            ShippingCost = 0,
             CreatedAt = DateTime.UtcNow,
             OrderItems = []
         };
+
+        order.Subtotal = 0;
 
         foreach (var item in cart.CartItems)
         {
@@ -82,8 +86,9 @@ public class OrdersService : IOrdersService
                 SubTotal = product.Price * item.Quantity
             };
 
+            order.Subtotal += orderItem.SubTotal;
+
             order.OrderItems.Add(orderItem);
-            order.TotalAmount += orderItem.SubTotal;
             var stockReduced = await _productApiClient.ReduceStockAsync(item.ProductId, item.Quantity);
 
             if (!stockReduced)
@@ -91,6 +96,7 @@ public class OrdersService : IOrdersService
                 return null;
             }
         }
+        order.TotalCost = order.Subtotal + order.ShippingCost;
 
         await _repository.AddOrderAsync(order);
         await _repository.SaveAsync();
