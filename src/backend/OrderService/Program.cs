@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using OrderService.Clients;
 using OrderService.Data;
+using OrderService.Messaging;
 using OrderService.Repositories;
 using OrderService.Services;
 
@@ -38,6 +39,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<IOrdersService, OrdersService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IEventPublisher, RabbitMqEventPublisher>();
 
 builder.Services.AddHealthChecks();
 

@@ -112,6 +112,7 @@ public class ProductService : IProductService
         }
 
         product.ReservedStockQuantity -= quantity;
+        product.StockQuantity += quantity;
         
         await _repository.SaveChangesAsync();
         return product;
@@ -126,6 +127,10 @@ public class ProductService : IProductService
             return null;
         }
         
+        if (product.StockQuantity < quantity || product.ReservedStockQuantity < quantity)
+        {
+            return null;
+        }
         product.StockQuantity -= quantity;
         product.ReservedStockQuantity -= quantity;
         

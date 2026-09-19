@@ -1447,7 +1447,8 @@
           "Microsoft.EntityFrameworkCore": "10.0.11",
           "Microsoft.EntityFrameworkCore.InMemory": "10.0.11",
           "Microsoft.EntityFrameworkCore.SqlServer": "10.0.11",
-          "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.3"
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.3",
+          "Shared.Messaging": "1.0.0"
         },
         "compile": {
           "bin/placeholder/ProductsService.dll": {}
@@ -1458,6 +1459,16 @@
         "frameworkReferences": [
           "Microsoft.AspNetCore.App"
         ]
+      },
+      "Shared.Messaging/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/Shared.Messaging.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Shared.Messaging.dll": {}
+        }
       }
     }
   },
@@ -3256,6 +3267,11 @@
       "type": "project",
       "path": "../../src/backend/ProductsService/ProductsService.csproj",
       "msbuildProject": "../../src/backend/ProductsService/ProductsService.csproj"
+    },
+    "Shared.Messaging/1.0.0": {
+      "type": "project",
+      "path": "../../src/backend/Shared.Messaging/Shared.Messaging.csproj",
+      "msbuildProject": "../../src/backend/Shared.Messaging/Shared.Messaging.csproj"
     }
   },
   "projectFileDependencyGroups": {

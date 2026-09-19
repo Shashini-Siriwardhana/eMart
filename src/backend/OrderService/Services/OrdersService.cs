@@ -3,8 +3,10 @@ using OrderService.Clients;
 using OrderService.Data;
 using OrderService.DTOs;
 using OrderService.Enums;
+using OrderService.Messaging;
 using OrderService.Models;
 using OrderService.Repositories;
+using Shared.Messaging.Events;
 
 namespace OrderService.Services;
 
@@ -13,12 +15,18 @@ public class OrdersService : IOrdersService
     private readonly IOrderRepository _repository;
     private readonly IProductApiClient _productApiClient;
     private readonly ICartApiClient _cartApiClient;
+    private readonly IEventPublisher _eventPublisher;
 
-    public OrdersService(IOrderRepository repository, IProductApiClient productApiClient, ICartApiClient cartApiClient)
+    public OrdersService(
+        IOrderRepository repository, 
+        IProductApiClient productApiClient, 
+        ICartApiClient cartApiClient,
+        IEventPublisher eventPublisher)
     {
         _repository = repository;
         _productApiClient = productApiClient;
         _cartApiClient = cartApiClient;
+        _eventPublisher = eventPublisher;
     }
 
     public async Task<List<Order>> GetAllOrdersAsync(Guid userId)
@@ -91,10 +99,19 @@ public class OrdersService : IOrdersService
             if (stockReserved is null)
             {
                 // Release everything reserved so far
-                foreach (var reservedItem in reservedItems)
+                var orderCancelledEvent = new OrderCancelledEvent
                 {
-                    await _productApiClient.ReleaseStockAsync(reservedItem.ProductId, reservedItem.Quantity);
-                }
+                    OrderId = order.Id,
+                    UserId = order.UserId,
+
+                    Items = reservedItems.Select(item => new OrderCancelledItem
+                    {
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity
+                    }).ToList()
+                };
+
+                await _eventPublisher.PublishAsync(orderCancelledEvent);
                 return null;
             }
 
@@ -132,14 +149,22 @@ public class OrdersService : IOrdersService
         }
 
         order.Status = OrderStatus.Cancelled;
-
-        foreach (var item in order.OrderItems)
-        {
-            await _productApiClient.ReleaseStockAsync(item.ProductId, item.Quantity);
-        }
-
         order.UpdatedAt = DateTime.UtcNow;
         await _repository.SaveAsync();
+
+        var orderCancelledEvent = new OrderCancelledEvent
+        {
+            OrderId = order.Id,
+            UserId = order.UserId,
+
+            Items = order.OrderItems.Select(item => new OrderCancelledItem
+            {
+                ProductId = item.ProductId,
+                Quantity = item.Quantity
+            }).ToList()
+        };
+
+        await _eventPublisher.PublishAsync(orderCancelledEvent);
 
         return order;
     }
