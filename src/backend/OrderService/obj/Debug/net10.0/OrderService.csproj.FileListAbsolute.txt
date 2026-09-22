@@ -244,3 +244,6 @@
 /Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/OrderService/obj/Debug/net10.0/OrderService.pdb
 /Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/OrderService/obj/Debug/net10.0/OrderService.genruntimeconfig.cache
 /Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/OrderService/obj/Debug/net10.0/ref/OrderService.dll
+/Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/OrderService/bin/Debug/net10.0/Shared.Messaging.dll
+/Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/OrderService/bin/Debug/net10.0/Shared.Messaging.pdb
+/Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/OrderService/bin/Debug/net10.0/RabbitMQ.Client.dll

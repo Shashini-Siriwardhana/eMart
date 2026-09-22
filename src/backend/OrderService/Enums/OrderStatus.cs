@@ -2,7 +2,7 @@ namespace OrderService.Enums;
 
 public enum OrderStatus
 {
-    Pending,
+    PendingPayment,
     Confirmed,
     Processing,
     Shipped,

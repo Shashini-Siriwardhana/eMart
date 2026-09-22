@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using OrderService.DTOs;
+using OrderService.Messaging;
 using OrderService.Services;
+using Shared.Messaging.Events;
 
 namespace OrderService.Controllers;
 
@@ -10,10 +12,12 @@ namespace OrderService.Controllers;
 public class OrderController : ControllerBase
 {
     private readonly IOrdersService _ordersService;
+    private readonly IEventPublisher _eventPublisher;
 
-    public OrderController(IOrdersService ordersService)
+    public OrderController(IOrdersService ordersService, IEventPublisher eventPublisher)
     {
         _ordersService = ordersService;
+        _eventPublisher = eventPublisher;
     }
 
     [HttpGet("user/{userId:guid}")]
@@ -60,5 +64,33 @@ public class OrderController : ControllerBase
         }
 
         return Ok(order);
+    }
+
+    [HttpPost("test")]
+    public async Task<IActionResult> Test()
+    {
+        var testEvent = new OrderCancelledEvent
+        {
+            OrderId = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            Items = [
+                new OrderCancelledItem {
+                    ProductId =Guid.Parse("ac99a69c-92fc-4c38-828d-6fa0cf41961c"),
+                    Quantity = 2
+                },
+                new OrderCancelledItem {
+                    ProductId = Guid.Parse("249266a1-9240-4a29-96fb-38e0cee57901"),
+                    Quantity = 10
+                },
+            ]
+        };
+
+        await _eventPublisher.PublishAsync(testEvent);
+
+        return Ok(new
+        {
+            message = "Test event published successfully",
+            testEvent
+        });
     }
 }

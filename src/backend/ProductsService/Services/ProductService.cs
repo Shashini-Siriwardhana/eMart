@@ -82,9 +82,60 @@ public class ProductService : IProductService
         return existingProduct;
     }
 
-    public async Task<bool> ReduceStockAsync(Guid productId, int quantity)
+    public async Task<Product?> ReserveStockAsync(Guid productId, int quantity)
     {
-        return await _repository.ReduceStockAsync(productId, quantity);
+        var product = await GetProductByIdAsync(productId);
+
+        if (product is null)
+        {
+            return null;
+        }
+
+        if (product.StockQuantity - product.ReservedStockQuantity < quantity)
+        {
+            return null;
+        }
+
+        product.ReservedStockQuantity += quantity;
+        
+        await _repository.SaveChangesAsync();
+        return product;
+    }
+
+    public async Task<Product?> ReleaseStockAsync(Guid productId, int quantity)
+    {
+        var product = await GetProductByIdAsync(productId);
+
+        if (product is null || product.ReservedStockQuantity < quantity)
+        {
+            return null;
+        }
+
+        product.ReservedStockQuantity -= quantity;
+        product.StockQuantity += quantity;
+        
+        await _repository.SaveChangesAsync();
+        return product;
+    }
+
+    public async Task<Product?> ReduceStockAsync(Guid productId, int quantity)
+    {
+        var product = await GetProductByIdAsync(productId);
+
+        if (product is null)
+        {
+            return null;
+        }
+        
+        if (product.StockQuantity < quantity || product.ReservedStockQuantity < quantity)
+        {
+            return null;
+        }
+        product.StockQuantity -= quantity;
+        product.ReservedStockQuantity -= quantity;
+        
+        await _repository.SaveChangesAsync();
+        return product;
     }
 
     public async Task<bool> DeleteProductAsync(Guid id)

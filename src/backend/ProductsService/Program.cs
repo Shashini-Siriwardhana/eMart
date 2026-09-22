@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using ProductsService.Data;
 using ProductsService.Services;
 using ProductsService.Repositories;
+using ProductsService.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddHostedService<RabbitMqEventConsumer>(); // Singleton service
 
 builder.Services.AddHealthChecks();
 

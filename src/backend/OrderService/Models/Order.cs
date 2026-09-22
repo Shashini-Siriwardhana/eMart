@@ -6,7 +6,7 @@ public class Order
 {
     public Guid Id {get; set;}
     public Guid UserId {get; set;}
-    public OrderStatus Status {get; set;} = OrderStatus.Pending;
+    public OrderStatus Status {get; set;} = OrderStatus.PendingPayment;
     public decimal TotalCost {get; set;}
     public decimal ShippingCost {get; set;}
     public decimal Subtotal {get; set;}

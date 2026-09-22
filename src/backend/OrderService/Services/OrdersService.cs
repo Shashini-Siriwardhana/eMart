@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Http.Features;
 using OrderService.Clients;
 using OrderService.Data;
 using OrderService.DTOs;
 using OrderService.Enums;
+using OrderService.Messaging;
 using OrderService.Models;
 using OrderService.Repositories;
+using Shared.Messaging.Events;
 
 namespace OrderService.Services;
 
@@ -12,12 +15,18 @@ public class OrdersService : IOrdersService
     private readonly IOrderRepository _repository;
     private readonly IProductApiClient _productApiClient;
     private readonly ICartApiClient _cartApiClient;
+    private readonly IEventPublisher _eventPublisher;
 
-    public OrdersService(IOrderRepository repository, IProductApiClient productApiClient, ICartApiClient cartApiClient)
+    public OrdersService(
+        IOrderRepository repository, 
+        IProductApiClient productApiClient, 
+        ICartApiClient cartApiClient,
+        IEventPublisher eventPublisher)
     {
         _repository = repository;
         _productApiClient = productApiClient;
         _cartApiClient = cartApiClient;
+        _eventPublisher = eventPublisher;
     }
 
     public async Task<List<Order>> GetAllOrdersAsync(Guid userId)
@@ -52,7 +61,7 @@ public class OrdersService : IOrdersService
         {
             Id = orderId,
             UserId = userId,
-            Status = OrderStatus.Pending,
+            Status = OrderStatus.PendingPayment,
             Subtotal = 0,
             TotalCost = 0,
             ShippingCost = 0,
@@ -61,16 +70,12 @@ public class OrdersService : IOrdersService
         };
 
         order.Subtotal = 0;
+        var reservedItems = new List<(Guid ProductId, int Quantity)>();
 
         foreach (var item in cart.CartItems)
         {
             var product = await _productApiClient.GetProductByIdAsync(item.ProductId);
             if (product is null)
-            {
-                return null;
-            }
-
-            if (product.StockQuantity < item.Quantity)
             {
                 return null;
             }
@@ -89,12 +94,28 @@ public class OrdersService : IOrdersService
             order.Subtotal += orderItem.SubTotal;
 
             order.OrderItems.Add(orderItem);
-            var stockReduced = await _productApiClient.ReduceStockAsync(item.ProductId, item.Quantity);
+            var stockReserved = await _productApiClient.ReserveStockAsync(item.ProductId, item.Quantity);
 
-            if (!stockReduced)
+            if (stockReserved is null)
             {
+                // Release everything reserved so far
+                var orderCancelledEvent = new OrderCancelledEvent
+                {
+                    OrderId = order.Id,
+                    UserId = order.UserId,
+
+                    Items = reservedItems.Select(item => new OrderCancelledItem
+                    {
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity
+                    }).ToList()
+                };
+
+                await _eventPublisher.PublishAsync(orderCancelledEvent);
                 return null;
             }
+
+            reservedItems.Add((item.ProductId, item.Quantity));
         }
         order.TotalCost = order.Subtotal + order.ShippingCost;
 
@@ -105,7 +126,6 @@ public class OrdersService : IOrdersService
         await _cartApiClient.ClearCartAsync(userId);
 
         // Confirm
-        order.Status = OrderStatus.Confirmed;
         order.UpdatedAt = DateTime.UtcNow;
         await _repository.SaveAsync();
 
@@ -116,7 +136,7 @@ public class OrdersService : IOrdersService
     {
         var order = await _repository.GetOrderByIdAsync(orderId);
 
-        if (order is null)
+        if (order is null || order.Status != OrderStatus.PendingPayment)
         {
             return null;
         }
@@ -131,6 +151,20 @@ public class OrdersService : IOrdersService
         order.Status = OrderStatus.Cancelled;
         order.UpdatedAt = DateTime.UtcNow;
         await _repository.SaveAsync();
+
+        var orderCancelledEvent = new OrderCancelledEvent
+        {
+            OrderId = order.Id,
+            UserId = order.UserId,
+
+            Items = order.OrderItems.Select(item => new OrderCancelledItem
+            {
+                ProductId = item.ProductId,
+                Quantity = item.Quantity
+            }).ToList()
+        };
+
+        await _eventPublisher.PublishAsync(orderCancelledEvent);
 
         return order;
     }

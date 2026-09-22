@@ -37,7 +37,7 @@ public class OrderDbContext : DbContext
 
         // Decimal precision - 18 digits total: 16 before decimal, 2 after decimal
         modelBuilder.Entity<Order>()
-        .Property(order => order.TotalAmount)
+        .Property(order => order.TotalCost)
         .HasPrecision(18, 2);
 
         modelBuilder.Entity<OrderItem>()

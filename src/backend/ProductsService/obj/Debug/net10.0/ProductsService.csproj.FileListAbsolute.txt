@@ -504,3 +504,6 @@
 /Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/ProductsService/obj/Debug/net10.0/ProductsService.pdb
 /Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/ProductsService/obj/Debug/net10.0/ProductsService.genruntimeconfig.cache
 /Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/ProductsService/obj/Debug/net10.0/ref/ProductsService.dll
+/Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/ProductsService/bin/Debug/net10.0/Shared.Messaging.dll
+/Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/ProductsService/bin/Debug/net10.0/Shared.Messaging.pdb
+/Users/shashinisiriwardhana/Doc/Projects/eMart/src/backend/ProductsService/bin/Debug/net10.0/RabbitMQ.Client.dll
