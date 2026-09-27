@@ -1,3 +1,6 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using OrderService.DTOs;
@@ -20,9 +23,18 @@ public class OrderController : ControllerBase
         _eventPublisher = eventPublisher;
     }
 
-    [HttpGet("user/{userId:guid}")]
-    public async Task<IActionResult> GetAllOrders(Guid userId)
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> GetAllOrders()
     {
+        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+
+        if (userIdClaim == null)
+        {
+            return Unauthorized();
+        }
+
+        var userId = Guid.Parse(userIdClaim.Value);
         var orders = await _ordersService.GetAllOrdersAsync(userId);
         return Ok(orders);
     }
@@ -40,9 +52,18 @@ public class OrderController : ControllerBase
         return Ok(order);
     }
 
-    [HttpPost("user/{userId:guid}")]
-    public async Task<IActionResult> CreateOrder(Guid userId)
+    [Authorize]
+    [HttpPost]
+    public async Task<IActionResult> CreateOrder()
     {
+        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+
+        if (userIdClaim == null)
+        {
+            return Unauthorized();
+        }
+
+        var userId = Guid.Parse(userIdClaim.Value);
         var order = await _ordersService.CreateOrderAsync(userId);
 
         if (order is null)

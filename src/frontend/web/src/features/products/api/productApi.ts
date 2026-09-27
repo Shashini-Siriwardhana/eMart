@@ -20,6 +20,6 @@ export const addProduct = async (payload: CreateProduct) : Promise<Product> => {
 }
 
 export const addProductToCart = async (payload: CreateCartItem) : Promise<Cart> => {
-    const response = await apiClient.post('/cart/01a0208b-92c8-7ec0-8424-b0a74f420270', payload);
+    const response = await apiClient.post('/cart', payload);
     return response.data;
 }

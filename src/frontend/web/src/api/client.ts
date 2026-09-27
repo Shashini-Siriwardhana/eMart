@@ -34,7 +34,7 @@ apiClient.interceptors.response.use(
         }
 
         try {
-            const userId = "01a09577-699e-71e4-90a3-3f50c0bdcb8e";
+            const userId = localStorage.getItem("userId");
 
             const response = await axios.post(
                 '/auth/refresh-token', {

@@ -24,10 +24,10 @@ public class AuthService(UserDbContext context, IConfiguration configuration) : 
         var hashedPassword = new PasswordHasher<User>().HashPassword(user, request.Password);
         user.UserName = request.UserName;
         user.PasswordHash = hashedPassword;
+        user.Role = request.Role;
 
         context.Users.Add(user);
         await context.SaveChangesAsync();
-        Console.WriteLine($"User registered: {user.UserName}, Password Hash: {user.PasswordHash}");
         return user;
     }
 
@@ -105,7 +105,7 @@ public class AuthService(UserDbContext context, IConfiguration configuration) : 
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(ClaimTypes.Role, user.Role)
         };
 
@@ -117,7 +117,7 @@ public class AuthService(UserDbContext context, IConfiguration configuration) : 
             issuer: configuration.GetValue<string>("AppSettings:Issuer"),
             audience: configuration.GetValue<string>("AppSettings:Audience"),
             claims: claims,
-            expires: DateTime.Now.AddMinutes(10), // JWT token expiry time set to 10 minutes
+            expires: DateTime.UtcNow.AddMinutes(10), // JWT token expiry time set to 10 minutes
             signingCredentials: creds
         );
 

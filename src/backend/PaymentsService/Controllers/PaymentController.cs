@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using PaymentsService.DTOs;
 using PaymentsService.Models;
 using PaymentsService.Services;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace PaymentsService.Controllers;
 
@@ -29,9 +31,18 @@ public class PaymentController : ControllerBase
         return Ok(response);
     }
 
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetPaymentHistoryByUser(Guid userId)
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> GetPaymentHistoryByUser()
     {
+        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+
+        if (userIdClaim == null)
+        {
+            return Unauthorized();
+        }
+
+        var userId = Guid.Parse(userIdClaim.Value);
         var response = await _paymentService.GetPaymentByUserIdAsync(userId);
 
         if (response is null)

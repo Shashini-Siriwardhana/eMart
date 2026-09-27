@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, type PropsWithChildren } from "react";
+import { jwtDecode, type JwtPayload } from "jwt-decode";
 
 interface AuthContextType {
     accessToken: string | null;
@@ -11,21 +12,28 @@ const AuthContext = createContext<AuthContextType|undefined>(undefined)
 
 export function AuthProvider({children} :PropsWithChildren) {
 
+    const [, setLoggedInUserId] = useState<string|null> (localStorage.getItem("userId"));
     const [accessToken, setAccessToken] = useState<string|null> (localStorage.getItem("accessToken"));
     const [refreshToken, setRefreshToken] = useState<string|null> (localStorage.getItem("refreshToken"));
 
     const login = (accessToken: string, refreshToken: string) => {
+        const decoded = jwtDecode<JwtPayload>(accessToken);
+        var userId = decoded.sub;
+        localStorage.setItem("userId", userId!);
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
 
+        setLoggedInUserId(userId!);
         setAccessToken(accessToken);
         setRefreshToken(refreshToken);
     };
 
     const logout = () => {
+        localStorage.removeItem("userId");
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
 
+        setLoggedInUserId(null);
         setAccessToken(null);
         setRefreshToken(null);
     }

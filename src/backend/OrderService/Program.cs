@@ -5,6 +5,10 @@ using OrderService.Data;
 using OrderService.Messaging;
 using OrderService.Repositories;
 using OrderService.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +38,23 @@ builder.Services
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+
+        ValidIssuer = builder.Configuration["AppSettings:Issuer"],
+        ValidAudience = builder.Configuration["AppSettings:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["AppSettings:Token"]!)),
+        RoleClaimType = ClaimTypes.Role
+    };
+});
+
 // Add services to the container.
 builder.Services.AddOpenApi();
 
@@ -42,6 +63,7 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IEventPublisher, RabbitMqEventPublisher>();
 
 builder.Services.AddHealthChecks();
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -55,5 +77,7 @@ app.UseHttpsRedirection();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();

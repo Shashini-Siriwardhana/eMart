@@ -6,6 +6,10 @@ using PaymentsService.Factories;
 using PaymentsService.Repositories;
 using PaymentsService.Services;
 using PaymentsService.Strategies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +31,22 @@ builder.Services
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+
+        ValidIssuer = builder.Configuration["AppSettings:Issuer"],
+        ValidAudience = builder.Configuration["AppSettings:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["AppSettings:Token"]!)),
+        RoleClaimType = ClaimTypes.Role
+    };
+});
+
 // Add services to the container.
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
@@ -40,6 +60,9 @@ builder.Services.AddScoped<IPaymentStrategyFactory, PaymentStrategyFactory>();
 
 builder.Services.AddHealthChecks();
 
+builder.Services.AddHealthChecks();
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -51,5 +74,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.MapControllers();
 app.MapHealthChecks("/health");
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();
