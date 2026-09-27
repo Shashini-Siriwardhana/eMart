@@ -97,6 +97,7 @@ public class ProductService : IProductService
         }
 
         product.ReservedStockQuantity += quantity;
+        product.StockQuantity -= quantity;
         
         await _repository.SaveChangesAsync();
         return product;
