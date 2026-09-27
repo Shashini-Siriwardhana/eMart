@@ -17,7 +17,7 @@ interface ProductCardProps {
 export const ProductCard = ({product}: ProductCardProps) => {
     const {setCart} = useCart();
     const IsOutOfStock = product.stockQuantity <= 0;
-    const [loading, setLoading] = useState<boolean>(true);
+    const [, setLoading] = useState<boolean>(true);
     const {showNotification} = useNotification();
 
     const handleAddToCart = async() => {

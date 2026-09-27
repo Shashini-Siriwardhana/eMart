@@ -12,7 +12,7 @@ export const AddProductForm = () => {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [error] = useState<string | null>(null);
     const [formData, setFormData] = useState<CreateProduct>({
         name: '',
         description: '',
@@ -27,7 +27,7 @@ export const AddProductForm = () => {
         event.preventDefault(); // Prevent page reload
         try {
             setLoading(true);
-            const data = await addProduct(formData);
+            await addProduct(formData);
             showNotification('Product added successfully', 'success');
             navigate('/products');
         } catch (error) {

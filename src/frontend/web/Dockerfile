@@ -13,7 +13,7 @@ COPY src/frontend/web/package*.json ./
 RUN npm ci
 
 # Copy frontend source
-COPY src/frontend/web .
+COPY src/frontend/web ./
 
 # Build React application
 RUN npm run build
@@ -27,6 +27,9 @@ FROM nginx:alpine AS final
 
 # Copy the built React files into Nginx
 COPY --from=build /app/dist /usr/share/nginx/html
+
+# Replace default Nginx configuration
+COPY src/frontend/web/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 

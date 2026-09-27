@@ -1,4 +1,4 @@
-import { Box, TextField, Button, Alert, Typography } from "@mui/material"
+import { Box, TextField, Button, Typography } from "@mui/material"
 import { PersonAddOutlined } from "@mui/icons-material";
 import { useState } from "react";
 
@@ -7,7 +7,7 @@ interface SignUpFormProps {
 }
 
 export const SignUpForm = ({setTabIndex}: SignUpFormProps) => {
-    const [loading, setLoading] = useState(false);
+    const [loading] = useState(false);
     const [error, setError] = useState("");
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");

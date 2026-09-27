@@ -5,7 +5,7 @@ import { CheckoutSummary } from "../components/CheckoutSummary"
 import { useState } from "react"
 
 export const PaymentPage = () => {
-    const [error, setError] = useState(false);
+    const [error] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('Stripe');
 
     return (

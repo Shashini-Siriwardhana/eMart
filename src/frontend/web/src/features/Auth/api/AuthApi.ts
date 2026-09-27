@@ -1,7 +1,7 @@
 import { apiClient } from "../../../api/client"
 
 export const registerUser = async(userName: string, password: string) => {
-    const response = await apiClient.post(`/api/auth/reister`, {
+    const response = await apiClient.post(`/auth/reister`, {
         UserName: userName,
         Password: password
     });
@@ -9,7 +9,7 @@ export const registerUser = async(userName: string, password: string) => {
 }
 
 export const loginUser = async(userName: string, password: string) => {
-    const response = await apiClient.post(`/api/auth/login`, {
+    const response = await apiClient.post(`/auth/login`, {
         UserName: userName,
         Password: password
     });

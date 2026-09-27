@@ -9,7 +9,7 @@ import { useCart } from "../../../context/CartContext"
 
 export const CartPage = () => {
     const {cart, setCart} = useCart();
-    const [loading, setLoading] = useState(false);
+    const [, setLoading] = useState(false);
     const {showNotification} = useNotification();
     const navigate = useNavigate();
 

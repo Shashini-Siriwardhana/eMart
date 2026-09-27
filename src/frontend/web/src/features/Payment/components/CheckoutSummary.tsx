@@ -9,7 +9,7 @@ interface CheckoutSummaryProps {
 
 export const CheckoutSummary = ({paymentMethod}: CheckoutSummaryProps) => {
     const {cart} = useCart();
-    const [loading, setLoading] = useState(false);
+    const [loading] = useState(false);
     // const [order, setOrder] = useState<Order|null>(null);
     // const paymentMethod = 'CashOnDelivery';
 
