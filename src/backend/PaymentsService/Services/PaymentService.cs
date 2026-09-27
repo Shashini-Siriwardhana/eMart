@@ -41,7 +41,7 @@ public class PaymentService : IPaymentService
             return new PaymentResult { IsSuccess = false, Message = "Order not found." };
         }
 
-        if (order.Status != "Confirmed")
+        if (order.Status != "PendingPayment")
         {
             return new PaymentResult { IsSuccess = false, Message = "Order is not confirmed." };
         }
