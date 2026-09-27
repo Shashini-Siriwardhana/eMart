@@ -5,21 +5,21 @@ import type { CreateProduct } from "../types/CreateProduct";
 import { type Product } from "../types/Product";
 
 export const getProducts = async () : Promise<Product[]> => {
-    const response = await apiClient.get<Product[]>('/api/products');
+    const response = await apiClient.get<Product[]>('/products');
     return response.data;
 };
 
 export const getProductById = async (id: string) : Promise<Product> => {
-    const response = await apiClient.get<Product>(`/api/products/${id}`);
+    const response = await apiClient.get<Product>(`/products/${id}`);
     return response.data;
 };
 
 export const addProduct = async (payload: CreateProduct) : Promise<Product> => {
-    const response = await apiClient.post<Product>('/api/products', payload);
+    const response = await apiClient.post<Product>('/products', payload);
     return response.data;
 }
 
 export const addProductToCart = async (payload: CreateCartItem) : Promise<Cart> => {
-    const response = await apiClient.post('/api/cart/01a0208b-92c8-7ec0-8424-b0a74f420270', payload);
+    const response = await apiClient.post('/cart/01a0208b-92c8-7ec0-8424-b0a74f420270', payload);
     return response.data;
 }

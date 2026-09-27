@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
-import {addProductToCart, getProducts } from '../api/productApi';
+import { getProducts } from '../api/productApi';
 import { ProductCard } from './ProductCard';
 import type { Product } from '../types/Product';
 import { SearchBar } from './SearchBar';
 import { FilterBar } from './FilterBar';
-import { Box, Button, Card, CardContent, Grid, Typography } from '@mui/material';
+import { Box, Button, Grid, Typography } from '@mui/material';
 
 export const ProductList = () => {
     const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+    const [, setLoading] = useState<boolean>(true);
+    const [, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -34,11 +34,8 @@ export const ProductList = () => {
 
     const onPriceChange = (event: Event, newValue: number | number[]) => {
         console.log('Selected price range:', newValue);
+        console.log('Selected event:', event);
         // Implement filtering logic based on the selected price range
-    }
-
-    const OnSearchChange = () => {
-        console.log('Search term changed:');
     }
 
     return (

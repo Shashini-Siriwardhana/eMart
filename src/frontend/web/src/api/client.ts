@@ -37,7 +37,7 @@ apiClient.interceptors.response.use(
             const userId = "01a09577-699e-71e4-90a3-3f50c0bdcb8e";
 
             const response = await axios.post(
-                '/api/auth/refresh-token', {
+                '/auth/refresh-token', {
                     userId: userId,
                     refreshToken: refreshToken
                 }

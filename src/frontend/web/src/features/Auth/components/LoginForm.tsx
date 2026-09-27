@@ -2,7 +2,7 @@ import { Box, TextField, Alert, Button, Typography } from "@mui/material"
 import { LockOutlined } from "@mui/icons-material";
 import { useState } from "react"
 import { loginUser } from "../api/AuthApi";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 
 interface LoginFormProps {
@@ -11,7 +11,7 @@ interface LoginFormProps {
 
 export const LoginForm = ({setTabIndex} : LoginFormProps) => {
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
+    const [error] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();

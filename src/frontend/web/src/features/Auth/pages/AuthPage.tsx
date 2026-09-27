@@ -3,7 +3,6 @@ import { LoginForm } from "../components/LoginForm"
 import { SignUpForm } from "../components/SignUpForm"
 import { StorefrontOutlined } from "@mui/icons-material"
 import { useState } from "react"
-import { useAuth } from "../../../context/AuthContext"
 
 export const AuthPage = () => {
     const [tabIndex, setTabIndex] = useState(0);

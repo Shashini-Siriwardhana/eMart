@@ -4,7 +4,6 @@ import { Link as RouterLink, useNavigate } from "react-router-dom"
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { UserMenu } from "./UserMenu";
 import { useCart } from "../../context/CartContext";
-import { useAuth } from "../../context/AuthContext";
 
 export const NavBar = () => {
     const navigate = useNavigate();
