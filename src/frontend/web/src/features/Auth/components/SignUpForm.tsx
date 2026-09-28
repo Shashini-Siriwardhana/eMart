@@ -1,13 +1,14 @@
 import { Box, TextField, Button, Typography } from "@mui/material"
 import { PersonAddOutlined } from "@mui/icons-material";
 import { useState } from "react";
+import { registerUser } from "../api/AuthApi";
 
 interface SignUpFormProps {
     setTabIndex: React.Dispatch<React.SetStateAction<number>>
 }
 
 export const SignUpForm = ({setTabIndex}: SignUpFormProps) => {
-    const [loading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -36,8 +37,21 @@ export const SignUpForm = ({setTabIndex}: SignUpFormProps) => {
         }
     }
 
+    const handleSubmit = async (event: React.SyntheticEvent) => {
+        event.preventDefault(); // Prevent page reload
+        try {
+            setLoading(true);
+            await registerUser(email, password);
+            setTabIndex(1)
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     return (
-        <Box component="form" sx={{ mt: 1 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <TextField
                 label="Full Name"
                 name="fullName"

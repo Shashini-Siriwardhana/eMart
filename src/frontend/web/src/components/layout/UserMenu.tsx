@@ -8,7 +8,7 @@ import { logoutUser } from "../../features/Auth/api/AuthApi"
 export const UserMenu = () => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
-    const {logout} = useAuth();
+    const {userName, role, logout} = useAuth();
     const navigate = useNavigate();
 
     const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -53,9 +53,9 @@ export const UserMenu = () => {
             >
                 {/* User Info Header */}
                 <Box sx={{ px: 2, py: 1.5 }}>
-                    <Typography variant="subtitle2" sx={{fontWeight: "bold"}}>user.name</Typography>
+                    <Typography variant="subtitle2" sx={{fontWeight: "bold"}}>{userName}</Typography>
                     <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
-                        user.email
+                        {role}
                     </Typography>
                 </Box>
 

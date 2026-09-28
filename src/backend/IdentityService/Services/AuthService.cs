@@ -125,9 +125,9 @@ public class AuthService(UserDbContext context, IConfiguration configuration) : 
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, user.UserName),
+            new Claim("name", user.UserName),
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(ClaimTypes.Role, user.Role)
+            new Claim("role", user.Role)
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("AppSettings:Token")!));
