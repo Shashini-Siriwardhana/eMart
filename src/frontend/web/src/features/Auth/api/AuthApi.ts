@@ -15,3 +15,8 @@ export const loginUser = async(userName: string, password: string) => {
     });
     return response.data;
 }
+
+export const logoutUser = async() => {
+    const response = await apiClient.post(`/auth/logout`, {});
+    return response.data;
+}

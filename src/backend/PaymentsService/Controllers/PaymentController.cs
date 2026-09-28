@@ -4,6 +4,7 @@ using PaymentsService.DTOs;
 using PaymentsService.Models;
 using PaymentsService.Services;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PaymentsService.Controllers;
 

@@ -41,7 +41,14 @@ public class OrderController : ControllerBase
     [HttpGet("{orderId:guid}")]
     public async Task<IActionResult> GetOrderById(Guid orderId)
     {
-        var order = await _ordersService.GetOrderByIdAsync(orderId);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var order = await _ordersService.GetOrderByIdAsync(orderId, userId);
 
         if (order is null)
         {
@@ -76,7 +83,13 @@ public class OrderController : ControllerBase
     [HttpPatch("{orderId:guid}")]
     public async Task<IActionResult> CancelOrder(Guid orderId)
     {
-        var order = await _ordersService.CancelOrderAsync(orderId);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+        var order = await _ordersService.CancelOrderAsync(orderId, userId);
 
         if (order is null)
         {
@@ -84,33 +97,5 @@ public class OrderController : ControllerBase
         }
 
         return Ok(order);
-    }
-
-    [HttpPost("test")]
-    public async Task<IActionResult> Test()
-    {
-        var testEvent = new OrderCancelledEvent
-        {
-            OrderId = Guid.NewGuid(),
-            UserId = Guid.NewGuid(),
-            Items = [
-                new OrderCancelledItem {
-                    ProductId =Guid.Parse("ac99a69c-92fc-4c38-828d-6fa0cf41961c"),
-                    Quantity = 2
-                },
-                new OrderCancelledItem {
-                    ProductId = Guid.Parse("249266a1-9240-4a29-96fb-38e0cee57901"),
-                    Quantity = 10
-                },
-            ]
-        };
-
-        await _eventPublisher.PublishAsync(testEvent);
-
-        return Ok(new
-        {
-            message = "Test event published successfully",
-            testEvent
-        });
     }
 }

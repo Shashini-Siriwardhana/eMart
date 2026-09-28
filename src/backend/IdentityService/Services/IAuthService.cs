@@ -5,7 +5,8 @@ namespace IdentityService.Services;
 
 public interface IAuthService
 {
-    Task<User?> RegisterAsync(UserDto request);
+    Task<UserResponseDto?> RegisterAsync(UserDto request);
     Task<TokenResponseDto?> LoginAsync(UserDto request);
+    Task<bool> LogoutAsync(Guid userId);
     Task<TokenResponseDto?> RefreshTokensAsync(RefreshTokenRequestDto request);
 }

@@ -36,8 +36,20 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpPost("logout")]
     public async Task<IActionResult> LogoutAsync()
     {
-        await authService.LogoutAsync(userID);
-        return Ok();
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var success = await authService.LogoutAsync(userID);
+
+        if (!success)
+        {
+            return NotFound();
+        }
+        return NoContent();
     }
 
     [Authorize]

@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using IdentityService.Data;
 using IdentityService.DTOs;
 using IdentityService.Models;
@@ -54,17 +55,18 @@ public class AuthService(UserDbContext context, IConfiguration configuration) : 
         return await CreateTokenResponse(user);
     }
 
-    public async void LogoutAsync(Guid userId)
+    public async Task<bool> LogoutAsync(Guid userId)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+        var user = await context.Users.FindAsync(userId);
         if (user is null)
         {
-            return null; // User not found
+            return false; // User not found
         }
         user.RefreshToken = null;
         user.RefreshTokenExpiryTime = null;
         await context.SaveChangesAsync();
 
+        return true;
     }
 
     public async Task<TokenResponseDto?> RefreshTokensAsync(RefreshTokenRequestDto request)

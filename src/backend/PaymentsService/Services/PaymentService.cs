@@ -99,13 +99,15 @@ public class PaymentService : IPaymentService
                 IsSuccess = false,
                 Message = "Payment has already been processed successfully.",
                 Payment = payment
-                };
+            };
         }
 
         payment.Method = paymentMethod;
         payment.Status = PaymentStatus.Successful;
         payment.UpdatedAt = DateTime.UtcNow;
         await _repository.UpdatePaymentAsync(payment);
+        var order = await _orderApiClient.GetOrderAsync(orderId);
+        order.status = "Confirmed";
         await _repository.SaveChangesAsync();
         return new PaymentResult { IsSuccess = true, Message = "Payment updated successfully.", Payment = payment };
     }

@@ -3,6 +3,7 @@ import { LogoutOutlined } from "@mui/icons-material"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
+import { logoutUser } from "../../features/Auth/api/AuthApi"
 
 export const UserMenu = () => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -18,7 +19,8 @@ export const UserMenu = () => {
         setAnchorEl(null);
     }
 
-    const handleLogoutClick = () => {
+    const handleLogoutClick = async() => {
+        await logoutUser();
         logout();
         navigate('/auth');
 

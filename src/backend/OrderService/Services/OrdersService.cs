@@ -35,9 +35,9 @@ public class OrdersService : IOrdersService
         return orders;
     }
 
-    public async Task<Order?> GetOrderByIdAsync(Guid orderId)
+    public async Task<Order?> GetOrderByIdAsync(Guid orderId, Guid userId)
     {
-        var order = await _repository.GetOrderByIdAsync(orderId);
+        var order = await _repository.GetOrderByIdAsync(orderId, userId);
 
         if (order is null)
         {
@@ -132,9 +132,9 @@ public class OrdersService : IOrdersService
         return order;
     }
 
-    public async Task<Order?> CancelOrderAsync(Guid orderId)
+    public async Task<Order?> CancelOrderAsync(Guid orderId, Guid userId)
     {
-        var order = await _repository.GetOrderByIdAsync(orderId);
+        var order = await _repository.GetOrderByIdAsync(orderId, userId);
 
         if (order is null || order.Status != OrderStatus.PendingPayment)
         {
