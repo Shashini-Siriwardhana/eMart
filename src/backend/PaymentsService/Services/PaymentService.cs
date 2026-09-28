@@ -1,3 +1,4 @@
+using System;
 using PaymentsService.Clients;
 using PaymentsService.DTOs;
 using PaymentsService.Enums;
@@ -20,9 +21,9 @@ public class PaymentService : IPaymentService
         _paymentStrategyFactory = paymentStrategyFactory;
     }
 
-    public async Task<Payment?> GetPaymentByOrderIdAsync(Guid orderId)
+    public async Task<Payment?> GetPaymentByOrderIdAsync(Guid orderId, Guid userId)
     {
-        var payment = await _repository.GetPaymentByOrderIdAsync(orderId);
+        var payment = await _repository.GetPaymentByOrderIdAsync(orderId, userId);
 
         return payment;
     }
@@ -77,6 +78,8 @@ public class PaymentService : IPaymentService
 
     public async Task<PaymentResult> UpdatePaymentAsync(Guid orderId, PaymentMethod paymentMethod)
     {
+        var order = await _orderApiClient.GetOrderAsync(orderId);
+        
         var payment = await _repository.GetPaymentByOrderIdAsync(orderId);
 
         if (payment is null)
@@ -106,8 +109,6 @@ public class PaymentService : IPaymentService
         payment.Status = PaymentStatus.Successful;
         payment.UpdatedAt = DateTime.UtcNow;
         await _repository.UpdatePaymentAsync(payment);
-        var order = await _orderApiClient.GetOrderAsync(orderId);
-        order.status = "Confirmed";
         await _repository.SaveChangesAsync();
         return new PaymentResult { IsSuccess = true, Message = "Payment updated successfully.", Payment = payment };
     }

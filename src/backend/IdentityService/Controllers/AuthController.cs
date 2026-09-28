@@ -43,7 +43,7 @@ public class AuthController(IAuthService authService) : ControllerBase
             return Unauthorized();
         }
 
-        var success = await authService.LogoutAsync(userID);
+        var success = await authService.LogoutAsync(userId);
 
         if (!success)
         {

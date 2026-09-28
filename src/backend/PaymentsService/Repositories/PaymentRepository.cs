@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using PaymentsService.Data;
 using PaymentsService.DTOs;
@@ -15,9 +16,9 @@ public class PaymentRepository : IPaymentRepository
         _context = context;
     }
 
-    public async Task<Payment?> GetPaymentByOrderIdAsync(Guid orderId)
+    public async Task<Payment?> GetPaymentByOrderIdAsync(Guid orderId, Guid userId)
     {
-        return await _context.Payments.FirstOrDefaultAsync(payment => payment.OrderId == orderId);
+        return await _context.Payments.FirstOrDefaultAsync(payment => payment.OrderId == orderId && payment.UserId == userId);
     }
 
     public async Task<List<Payment>> GetPaymentByUserIdAsync(Guid userId)

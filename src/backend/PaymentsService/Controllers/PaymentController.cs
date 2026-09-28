@@ -23,7 +23,14 @@ public class PaymentController : ControllerBase
     [HttpGet("order/{orderId}")]
     public async Task<IActionResult> GetPaymentHistory(Guid orderId)
     {
-        var response = await _paymentService.GetPaymentByOrderIdAsync(orderId);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var response = await _paymentService.GetPaymentByOrderIdAsync(orderId, userId);
 
         if (response is null)
         {
@@ -72,6 +79,13 @@ public class PaymentController : ControllerBase
     [HttpPatch]
     public async Task<IActionResult> UpdatePayment([FromBody] UpdatePaymentDto dto)
     {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+
         var response = await _paymentService.UpdatePaymentAsync(dto.OrderId, dto.PaymentMethod);
 
         if (!response.IsSuccess)

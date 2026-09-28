@@ -49,7 +49,7 @@ public class OrdersService : IOrdersService
 
     public async Task<Order?> CreateOrderAsync(Guid userId)
     {
-        var cart = await _cartApiClient.GetCartItemsAsync(userId);
+        var cart = await _cartApiClient.GetCartItemsAsync();
         if (cart is null || !cart.CartItems.Any())
         {
             return null;
@@ -123,7 +123,7 @@ public class OrdersService : IOrdersService
         await _repository.SaveAsync();
 
         // Clear cart
-        await _cartApiClient.ClearCartAsync(userId);
+        await _cartApiClient.ClearCartAsync();
 
         // Confirm
         order.UpdatedAt = DateTime.UtcNow;
