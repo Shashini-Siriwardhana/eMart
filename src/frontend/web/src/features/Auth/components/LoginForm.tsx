@@ -26,7 +26,8 @@ export const LoginForm = ({setTabIndex} : LoginFormProps) => {
                     response.accessToken,
                     response.refreshToken
                 )
-                navigate('/products');
+                
+                navigate("/products")
             } catch (error) {
                 console.error(error);
             } finally {

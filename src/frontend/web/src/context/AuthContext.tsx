@@ -11,7 +11,7 @@ interface AuthContextType {
     logout: () => void;
 }
 
-interface JwtPayload {
+export interface JwtPayload {
     sub: string;
     name: string;
     role?: string;

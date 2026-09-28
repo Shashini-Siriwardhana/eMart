@@ -15,7 +15,7 @@ namespace IdentityService.Services;
 
 public class AuthService(UserDbContext context, IConfiguration configuration) : IAuthService
 {
-    public async Task<UserResponseDto?> RegisterAsync(UserDto request)
+    public async Task<UserResponseDto?> RegisterAsync(UserDto request, string role="Customer")
     {
          if (await context.Users.AnyAsync(u => u.UserName == request.UserName))
         {
@@ -27,7 +27,7 @@ public class AuthService(UserDbContext context, IConfiguration configuration) : 
         user.UserName = request.UserName;
         user.PasswordHash = hashedPassword;
         user.Id = Guid.NewGuid();
-        user.Role = "Customer";
+        user.Role = role;
 
         context.Users.Add(user);
         await context.SaveChangesAsync();

@@ -22,6 +22,18 @@ public class AuthController(IAuthService authService) : ControllerBase
         return Ok(user);
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpPost("admin/register")]
+    public async Task<IActionResult> RegisterAdminAsync(UserDto request)
+    {
+        var user = await authService.RegisterAsync(request, "Admin");
+        if (user is null)
+        {
+            return BadRequest(new { message = "Username already exists." });
+        }
+        return Ok(user);
+    }
+
     [HttpPost("login")]
     public async Task<IActionResult> LoginAsync(UserDto request)
     {
