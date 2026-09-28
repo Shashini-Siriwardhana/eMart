@@ -9,6 +9,13 @@ export const apiClient = axios.create({
     },
 });
 
+export const refreshClient = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
 apiClient.interceptors.request.use((config) => {
     const accessToken = localStorage.getItem("accessToken");
 
@@ -36,7 +43,7 @@ apiClient.interceptors.response.use(
         try {
             const userId = localStorage.getItem("userId");
 
-            const response = await axios.post(
+            const response = await refreshClient.post(
                 '/auth/refresh-token', {
                     userId: userId,
                     refreshToken: refreshToken

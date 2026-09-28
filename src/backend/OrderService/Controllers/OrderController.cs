@@ -27,18 +27,17 @@ public class OrderController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllOrders()
     {
-        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (userIdClaim == null)
+        if (!Guid.TryParse(userIdClaim, out var userId))
         {
             return Unauthorized();
         }
-
-        var userId = Guid.Parse(userIdClaim.Value);
         var orders = await _ordersService.GetAllOrdersAsync(userId);
         return Ok(orders);
     }
 
+    [Authorize]
     [HttpGet("{orderId:guid}")]
     public async Task<IActionResult> GetOrderById(Guid orderId)
     {
@@ -56,14 +55,13 @@ public class OrderController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateOrder()
     {
-        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (userIdClaim == null)
+        if (!Guid.TryParse(userIdClaim, out var userId))
         {
             return Unauthorized();
         }
-
-        var userId = Guid.Parse(userIdClaim.Value);
+        
         var order = await _ordersService.CreateOrderAsync(userId);
 
         if (order is null)
@@ -74,6 +72,7 @@ public class OrderController : ControllerBase
         return CreatedAtAction(nameof(GetOrderById), new {orderId = order.Id}, order);
     }
 
+    [Authorize]
     [HttpPatch("{orderId:guid}")]
     public async Task<IActionResult> CancelOrder(Guid orderId)
     {

@@ -15,7 +15,7 @@ public class CartApiClient : ICartApiClient
     public async Task<CartDto?> GetCartItemsAsync(Guid userId)
     {
         var response = await _httpClient.GetAsync(
-            $"api/cart/{userId}"
+            $"api/cart/"
         );
 
         if (response.StatusCode == HttpStatusCode.NotFound)
@@ -31,7 +31,7 @@ public class CartApiClient : ICartApiClient
     public async Task<bool> ClearCartAsync(Guid userId)
     {
         var response = await _httpClient.DeleteAsync(
-            $"api/cart/{userId}/items"
+            $"api/cart/items"
         );
 
        return response.IsSuccessStatusCode;

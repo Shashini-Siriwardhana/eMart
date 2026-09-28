@@ -45,7 +45,7 @@ export const LoginForm = ({setTabIndex} : LoginFormProps) => {
     }
 
     return (
-        <Box component="form" onClick={handleSubmit} sx={{ mt: 1 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
             <TextField
                 label="Email Address"

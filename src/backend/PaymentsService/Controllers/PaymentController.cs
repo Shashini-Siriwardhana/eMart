@@ -18,6 +18,7 @@ public class PaymentController : ControllerBase
         _paymentService = paymentService;
     }
 
+    [Authorize]
     [HttpGet("order/{orderId}")]
     public async Task<IActionResult> GetPaymentHistory(Guid orderId)
     {
@@ -35,14 +36,13 @@ public class PaymentController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetPaymentHistoryByUser()
     {
-        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (userIdClaim == null)
+        if (!Guid.TryParse(userIdClaim, out var userId))
         {
             return Unauthorized();
         }
 
-        var userId = Guid.Parse(userIdClaim.Value);
         var response = await _paymentService.GetPaymentByUserIdAsync(userId);
 
         if (response is null)
@@ -53,6 +53,7 @@ public class PaymentController : ControllerBase
         return Ok(response);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDto dto)
     {
@@ -66,6 +67,7 @@ public class PaymentController : ControllerBase
         return Ok(response);
     }
 
+    [Authorize]
     [HttpPatch]
     public async Task<IActionResult> UpdatePayment([FromBody] UpdatePaymentDto dto)
     {

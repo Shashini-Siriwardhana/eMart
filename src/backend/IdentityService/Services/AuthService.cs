@@ -1,3 +1,4 @@
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -13,7 +14,7 @@ namespace IdentityService.Services;
 
 public class AuthService(UserDbContext context, IConfiguration configuration) : IAuthService
 {
-    public async Task<User?> RegisterAsync(UserDto request)
+    public async Task<UserResponseDto?> RegisterAsync(UserDto request)
     {
          if (await context.Users.AnyAsync(u => u.UserName == request.UserName))
         {
@@ -24,11 +25,16 @@ public class AuthService(UserDbContext context, IConfiguration configuration) : 
         var hashedPassword = new PasswordHasher<User>().HashPassword(user, request.Password);
         user.UserName = request.UserName;
         user.PasswordHash = hashedPassword;
-        user.Role = request.Role;
+        user.Id = Guid.NewGuid();
+        user.Role = "Customer";
 
         context.Users.Add(user);
         await context.SaveChangesAsync();
-        return user;
+        var response = new UserResponseDto();
+        response.Id = user.Id;
+        response.UserName = user.UserName;
+        response.Role = user.Role;
+        return response;
     }
 
     public async Task<TokenResponseDto?> LoginAsync(UserDto request)
@@ -46,6 +52,19 @@ public class AuthService(UserDbContext context, IConfiguration configuration) : 
         }
 
         return await CreateTokenResponse(user);
+    }
+
+    public async void LogoutAsync(Guid userId)
+    {
+        var user = await context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+        if (user is null)
+        {
+            return null; // User not found
+        }
+        user.RefreshToken = null;
+        user.RefreshTokenExpiryTime = null;
+        await context.SaveChangesAsync();
+
     }
 
     public async Task<TokenResponseDto?> RefreshTokensAsync(RefreshTokenRequestDto request)

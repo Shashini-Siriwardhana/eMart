@@ -2,6 +2,7 @@ using IdentityService.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using IdentityService.Services;
 using Microsoft.AspNetCore.Authorization;
+using System;
 
 namespace IdentityService.Controllers;
 
@@ -29,6 +30,14 @@ public class AuthController(IAuthService authService) : ControllerBase
             return Unauthorized(new { message = "Invalid username or password." });
         }
         return Ok(token);
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> LogoutAsync()
+    {
+        await authService.LogoutAsync(userID);
+        return Ok();
     }
 
     [Authorize]

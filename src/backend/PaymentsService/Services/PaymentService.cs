@@ -63,7 +63,7 @@ public class PaymentService : IPaymentService
             Id = Guid.NewGuid(),
             OrderId = order.Id,
             UserId = order.UserId,
-            Amount = order.TotalAmount,
+            Amount = order.TotalCost,
             Status = PaymentStatus.Pending,
             CreatedAt = DateTime.UtcNow,
 

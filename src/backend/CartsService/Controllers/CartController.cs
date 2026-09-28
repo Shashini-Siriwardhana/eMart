@@ -22,14 +22,13 @@ public class CartController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetCartItems()
     {
-        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (userIdClaim == null)
+        if (!Guid.TryParse(userIdClaim, out var userId))
         {
             return Unauthorized();
         }
 
-        var userId = Guid.Parse(userIdClaim.Value);
         var cart = await _cartService.GetCartAsync(userId);
 
         if (cart is null)
@@ -44,14 +43,13 @@ public class CartController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateCartItem([FromBody] AddCartItemDto addCartItemDto)
     {
-        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (userIdClaim == null)
+        if (!Guid.TryParse(userIdClaim, out var userId))
         {
             return Unauthorized();
         }
 
-        var userId = Guid.Parse(userIdClaim.Value);
         var cart = await _cartService.AddItemToCartAsync(userId, addCartItemDto);
 
         if (cart is null)
@@ -63,17 +61,16 @@ public class CartController : ControllerBase
     }
 
     [Authorize]
-    [HttpPatch("/items/{productId:guid}")]
+    [HttpPatch("items/{productId:guid}")]
     public async Task<IActionResult> UpdateCart(Guid productId, [FromBody] UpdateCartDto updateCartDto)
     {
-        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (userIdClaim == null)
+        if (!Guid.TryParse(userIdClaim, out var userId))
         {
             return Unauthorized();
         }
 
-        var userId = Guid.Parse(userIdClaim.Value);
         var cart = await _cartService.UpdateItemQuantityAsync(userId, productId, updateCartDto.Quantity);
 
         if (cart is null)
@@ -85,17 +82,16 @@ public class CartController : ControllerBase
     }
 
     [Authorize]
-    [HttpDelete("/items/{productId:guid}")]
+    [HttpDelete("items/{productId:guid}")]
     public async Task<IActionResult> DeleteItemFromCart(Guid productId)
     {
-        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (userIdClaim == null)
+        if (!Guid.TryParse(userIdClaim, out var userId))
         {
             return Unauthorized();
         }
 
-        var userId = Guid.Parse(userIdClaim.Value);
         var cart = await _cartService.DeleteItemFromCartAsync(userId, productId);
 
         if (cart is null)
@@ -107,17 +103,16 @@ public class CartController : ControllerBase
     }
 
     [Authorize]
-    [HttpDelete("/items")]
+    [HttpDelete("items")]
     public async Task<IActionResult> ClearCart()
     {
-        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (userIdClaim == null)
+        if (!Guid.TryParse(userIdClaim, out var userId))
         {
             return Unauthorized();
         }
 
-        var userId = Guid.Parse(userIdClaim.Value);
         var success = await _cartService.DeleteCartAsync(userId);
 
         if(!success)
