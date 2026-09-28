@@ -32,6 +32,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddHealthChecks();
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -41,10 +42,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapControllers();
-
-app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers();
 app.MapHealthChecks("/health");
 
 app.Run();

@@ -1,3 +1,4 @@
+using System;
 using PaymentsService.Clients;
 using PaymentsService.DTOs;
 using PaymentsService.Enums;
@@ -20,9 +21,9 @@ public class PaymentService : IPaymentService
         _paymentStrategyFactory = paymentStrategyFactory;
     }
 
-    public async Task<Payment?> GetPaymentByOrderIdAsync(Guid orderId)
+    public async Task<Payment?> GetPaymentByOrderIdAsync(Guid orderId, Guid userId)
     {
-        var payment = await _repository.GetPaymentByOrderIdAsync(orderId);
+        var payment = await _repository.GetPaymentByOrderIdAsync(orderId, userId);
 
         return payment;
     }
@@ -41,12 +42,12 @@ public class PaymentService : IPaymentService
             return new PaymentResult { IsSuccess = false, Message = "Order not found." };
         }
 
-        if (order.Status != "Confirmed")
+        if (order.Status != "PendingPayment")
         {
             return new PaymentResult { IsSuccess = false, Message = "Order is not confirmed." };
         }
 
-        var existingPayment = await _repository.GetPaymentByOrderIdAsync(orderId);
+        var existingPayment = await _repository.GetPaymentByOrderIdAsync(orderId, order.UserId);
         
         if (existingPayment is not null)
         {
@@ -63,7 +64,7 @@ public class PaymentService : IPaymentService
             Id = Guid.NewGuid(),
             OrderId = order.Id,
             UserId = order.UserId,
-            Amount = order.TotalAmount,
+            Amount = order.TotalCost,
             Status = PaymentStatus.Pending,
             CreatedAt = DateTime.UtcNow,
 
@@ -77,7 +78,9 @@ public class PaymentService : IPaymentService
 
     public async Task<PaymentResult> UpdatePaymentAsync(Guid orderId, PaymentMethod paymentMethod)
     {
-        var payment = await _repository.GetPaymentByOrderIdAsync(orderId);
+        var order = await _orderApiClient.GetOrderAsync(orderId);
+        
+        var payment = await _repository.GetPaymentByOrderIdAsync(orderId, order.UserId);
 
         if (payment is null)
         {
@@ -99,7 +102,7 @@ public class PaymentService : IPaymentService
                 IsSuccess = false,
                 Message = "Payment has already been processed successfully.",
                 Payment = payment
-                };
+            };
         }
 
         payment.Method = paymentMethod;

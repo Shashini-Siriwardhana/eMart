@@ -14,6 +14,9 @@ services:
       RabbitMQ__Port: 5672
       RabbitMQ__UserName: emart
       RabbitMQ__Password: emart123
+      AppSettings__Token: ${JWT_TOKEN}
+      AppSettings__Issuer: ${ISSUER}
+      AppSettings__Audience: ${AUDIENCE}
     depends_on:
       products-db:
         condition: service_healthy
@@ -31,9 +34,9 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__UsersDB: "Host=users-db;Port=5432;Database=usersdb;Username=postgres;Password=postgres123"
-      AppSettings__Token: "ThisIsASecretKeyForJWTTokenGenerationForEMartApplicationForTestingPurposes"
-      AppSettings__Issuer: "eMart"
-      AppSettings__Audience: "eMartUsers"
+      AppSettings__Token: ${JWT_TOKEN}
+      AppSettings__Issuer: ${ISSUER}
+      AppSettings__Audience: ${AUDIENCE}
     depends_on:
       users-db:
         condition: service_healthy
@@ -50,6 +53,9 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__CartsDB: "Host=carts-db;Port=5432;Database=cartsdb;Username=postgres;Password=postgres123"
       Services__ProductService: "http://products-service:8080"
+      AppSettings__Token: ${JWT_TOKEN}
+      AppSettings__Issuer: ${ISSUER}
+      AppSettings__Audience: ${AUDIENCE}
     depends_on:
       products-service:
         condition: service_started
@@ -73,6 +79,9 @@ services:
       RabbitMQ__Port: 5672
       RabbitMQ__UserName: emart
       RabbitMQ__Password: emart123
+      AppSettings__Token: ${JWT_TOKEN}
+      AppSettings__Issuer: ${ISSUER}
+      AppSettings__Audience: ${AUDIENCE}
     depends_on:
       products-service:
           condition: service_started
@@ -95,6 +104,9 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__PaymentsDB: "Host=payments-db;Port=5432;Database=paymentsdb;Username=postgres;Password=postgres123"
       Services__OrderService: "http://order-service:8080"
+      AppSettings__Token: ${JWT_TOKEN}
+      AppSettings__Issuer: ${ISSUER}
+      AppSettings__Audience: ${AUDIENCE}
     depends_on:
       order-service:
           condition: service_started

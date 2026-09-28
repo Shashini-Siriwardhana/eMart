@@ -1,7 +1,9 @@
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using IdentityService.Data;
 using IdentityService.DTOs;
 using IdentityService.Models;
@@ -13,7 +15,7 @@ namespace IdentityService.Services;
 
 public class AuthService(UserDbContext context, IConfiguration configuration) : IAuthService
 {
-    public async Task<User?> RegisterAsync(UserDto request)
+    public async Task<UserResponseDto?> RegisterAsync(UserDto request, string role="Customer")
     {
          if (await context.Users.AnyAsync(u => u.UserName == request.UserName))
         {
@@ -24,11 +26,16 @@ public class AuthService(UserDbContext context, IConfiguration configuration) : 
         var hashedPassword = new PasswordHasher<User>().HashPassword(user, request.Password);
         user.UserName = request.UserName;
         user.PasswordHash = hashedPassword;
+        user.Id = Guid.NewGuid();
+        user.Role = role;
 
         context.Users.Add(user);
         await context.SaveChangesAsync();
-        Console.WriteLine($"User registered: {user.UserName}, Password Hash: {user.PasswordHash}");
-        return user;
+        var response = new UserResponseDto();
+        response.Id = user.Id;
+        response.UserName = user.UserName;
+        response.Role = user.Role;
+        return response;
     }
 
     public async Task<TokenResponseDto?> LoginAsync(UserDto request)
@@ -46,6 +53,20 @@ public class AuthService(UserDbContext context, IConfiguration configuration) : 
         }
 
         return await CreateTokenResponse(user);
+    }
+
+    public async Task<bool> LogoutAsync(Guid userId)
+    {
+        var user = await context.Users.FindAsync(userId);
+        if (user is null)
+        {
+            return false; // User not found
+        }
+        user.RefreshToken = null;
+        user.RefreshTokenExpiryTime = null;
+        await context.SaveChangesAsync();
+
+        return true;
     }
 
     public async Task<TokenResponseDto?> RefreshTokensAsync(RefreshTokenRequestDto request)
@@ -104,9 +125,9 @@ public class AuthService(UserDbContext context, IConfiguration configuration) : 
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Role, user.Role)
+            new Claim("name", user.UserName),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim("role", user.Role)
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("AppSettings:Token")!));
@@ -117,7 +138,7 @@ public class AuthService(UserDbContext context, IConfiguration configuration) : 
             issuer: configuration.GetValue<string>("AppSettings:Issuer"),
             audience: configuration.GetValue<string>("AppSettings:Audience"),
             claims: claims,
-            expires: DateTime.Now.AddMinutes(10), // JWT token expiry time set to 10 minutes
+            expires: DateTime.UtcNow.AddMinutes(10), // JWT token expiry time set to 10 minutes
             signingCredentials: creds
         );
 

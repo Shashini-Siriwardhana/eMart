@@ -1,7 +1,10 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using PaymentsService.DTOs;
 using PaymentsService.Models;
 using PaymentsService.Services;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PaymentsService.Controllers;
 
@@ -16,10 +19,18 @@ public class PaymentController : ControllerBase
         _paymentService = paymentService;
     }
 
+    [Authorize]
     [HttpGet("order/{orderId}")]
     public async Task<IActionResult> GetPaymentHistory(Guid orderId)
     {
-        var response = await _paymentService.GetPaymentByOrderIdAsync(orderId);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var response = await _paymentService.GetPaymentByOrderIdAsync(orderId, userId);
 
         if (response is null)
         {
@@ -29,9 +40,17 @@ public class PaymentController : ControllerBase
         return Ok(response);
     }
 
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetPaymentHistoryByUser(Guid userId)
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> GetPaymentHistoryByUser()
     {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+
         var response = await _paymentService.GetPaymentByUserIdAsync(userId);
 
         if (response is null)
@@ -42,6 +61,7 @@ public class PaymentController : ControllerBase
         return Ok(response);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDto dto)
     {
@@ -55,9 +75,17 @@ public class PaymentController : ControllerBase
         return Ok(response);
     }
 
+    [Authorize]
     [HttpPatch]
     public async Task<IActionResult> UpdatePayment([FromBody] UpdatePaymentDto dto)
     {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+
         var response = await _paymentService.UpdatePaymentAsync(dto.OrderId, dto.PaymentMethod);
 
         if (!response.IsSuccess)

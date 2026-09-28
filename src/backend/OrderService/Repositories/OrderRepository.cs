@@ -20,9 +20,9 @@ public class OrderRepository : IOrderRepository
         .ToListAsync();
     } 
 
-    public async Task<Order?> GetOrderByIdAsync(Guid orderId)
+    public async Task<Order?> GetOrderByIdAsync(Guid orderId, Guid userId)
     {
-        return await _context.Orders.Where(order => order.Id == orderId)
+        return await _context.Orders.Where(order => order.Id == orderId && order.UserId == userId)
         .Include(order => order.OrderItems)
         .FirstOrDefaultAsync();
     }

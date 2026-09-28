@@ -12,10 +12,10 @@ public class CartApiClient : ICartApiClient
         _httpClient = httpClient;
     }
 
-    public async Task<CartDto?> GetCartItemsAsync(Guid userId)
+    public async Task<CartDto?> GetCartItemsAsync()
     {
         var response = await _httpClient.GetAsync(
-            $"api/cart/{userId}"
+            $"api/cart/"
         );
 
         if (response.StatusCode == HttpStatusCode.NotFound)
@@ -28,10 +28,10 @@ public class CartApiClient : ICartApiClient
         return await response.Content.ReadFromJsonAsync<CartDto>();
     }
 
-    public async Task<bool> ClearCartAsync(Guid userId)
+    public async Task<bool> ClearCartAsync()
     {
         var response = await _httpClient.DeleteAsync(
-            $"api/cart/{userId}/items"
+            $"api/cart/items"
         );
 
        return response.IsSuccessStatusCode;

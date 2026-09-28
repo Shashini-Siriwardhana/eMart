@@ -2,6 +2,8 @@ using IdentityService.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using IdentityService.Services;
 using Microsoft.AspNetCore.Authorization;
+using System;
+using System.Security.Claims;
 
 namespace IdentityService.Controllers;
 
@@ -20,6 +22,18 @@ public class AuthController(IAuthService authService) : ControllerBase
         return Ok(user);
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpPost("admin/register")]
+    public async Task<IActionResult> RegisterAdminAsync(UserDto request)
+    {
+        var user = await authService.RegisterAsync(request, "Admin");
+        if (user is null)
+        {
+            return BadRequest(new { message = "Username already exists." });
+        }
+        return Ok(user);
+    }
+
     [HttpPost("login")]
     public async Task<IActionResult> LoginAsync(UserDto request)
     {
@@ -29,6 +43,26 @@ public class AuthController(IAuthService authService) : ControllerBase
             return Unauthorized(new { message = "Invalid username or password." });
         }
         return Ok(token);
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> LogoutAsync()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var success = await authService.LogoutAsync(userId);
+
+        if (!success)
+        {
+            return NotFound();
+        }
+        return NoContent();
     }
 
     [Authorize]

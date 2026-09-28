@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductsService.DTOs;
 using ProductsService.Services;
@@ -47,6 +48,7 @@ public class ProductsController : ControllerBase
         return Ok(product);
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     public async Task<IActionResult> CreateProduct(CreateProductDto product)
     {
@@ -62,6 +64,7 @@ public class ProductsController : ControllerBase
         return CreatedAtAction(nameof(GetProductById), new { id = createdProduct.Id }, createdProduct);
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPatch("{id}")]
     public async Task<IActionResult> UpdateProduct(Guid id, UpdateProductDto product)
     {
@@ -128,6 +131,7 @@ public class ProductsController : ControllerBase
         return Ok(response);
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProduct(Guid id)
     {
