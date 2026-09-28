@@ -47,7 +47,7 @@ public class PaymentService : IPaymentService
             return new PaymentResult { IsSuccess = false, Message = "Order is not confirmed." };
         }
 
-        var existingPayment = await _repository.GetPaymentByOrderIdAsync(orderId);
+        var existingPayment = await _repository.GetPaymentByOrderIdAsync(orderId, order.UserId);
         
         if (existingPayment is not null)
         {
@@ -80,7 +80,7 @@ public class PaymentService : IPaymentService
     {
         var order = await _orderApiClient.GetOrderAsync(orderId);
         
-        var payment = await _repository.GetPaymentByOrderIdAsync(orderId);
+        var payment = await _repository.GetPaymentByOrderIdAsync(orderId, order.UserId);
 
         if (payment is null)
         {
