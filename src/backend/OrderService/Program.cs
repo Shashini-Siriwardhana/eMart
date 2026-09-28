@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
+using OrderService.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,13 +17,17 @@ var connectionString = builder.Configuration.GetConnectionString("OrdersDB");
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<BearerTokenForwardingHandler>();
+
 builder.Services.AddHttpClient<IProductApiClient, ProductApiClient>(
     client =>
     {
         client.BaseAddress = new Uri(
             builder.Configuration["Services:ProductService"]!
         );
-    });
+    })
+    .AddHttpMessageHandler<BearerTokenForwardingHandler>();
 
 builder.Services.AddHttpClient<ICartApiClient, CartApiClient>(
     client =>
@@ -30,7 +35,8 @@ builder.Services.AddHttpClient<ICartApiClient, CartApiClient>(
         client.BaseAddress = new Uri(
             builder.Configuration["Services:CartsService"]!
         );
-    });
+    })
+    .AddHttpMessageHandler<BearerTokenForwardingHandler>();
 
 builder.Services
 .AddControllers()

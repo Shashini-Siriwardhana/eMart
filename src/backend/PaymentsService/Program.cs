@@ -18,10 +18,14 @@ var connectionString = builder.Configuration.GetConnectionString("PaymentsDB");
 builder.Services.AddDbContext<PaymentDbContext>(options => 
 options.UseNpgsql(connectionString));
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<BearerTokenForwardingHandler>();
+
 builder.Services.AddHttpClient<IOrderApiClient, OrderApiClient>(
     client => client.BaseAddress = new Uri(
         builder.Configuration["Services:OrderService"]!
-    ));
+    ))
+    .AddHttpMessageHandler<BearerTokenForwardingHandler>();
 
 // Keep enums as int in DB and expose them as strings in API
 builder.Services

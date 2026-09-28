@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
+using CartsService.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,13 +15,17 @@ var connectionString = builder.Configuration.GetConnectionString("CartsDB");
 builder.Services.AddDbContext<CartDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<BearerTokenForwardingHandler>();
+
 builder.Services.AddHttpClient<IProductApiClient, ProductApiClient>(
     client =>
     {
         client.BaseAddress = new Uri(
             builder.Configuration["Services:ProductService"]!
         );
-    });
+    })
+    .AddHttpMessageHandler<BearerTokenForwardingHandler>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
